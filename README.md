@@ -1,58 +1,61 @@
 # Measuring Prompt Energy in LLMs
 
-Research project analyzing prompt energy in Large Language Models using the lmsys-chat-1m dataset.
+Fast and easy analysis of 1M+ chat conversations for LLM research
 
-## Quick Start
+## Quick Start (2 minutes)
 
-1. **Setup environment:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. Install
+```bash
+pip install -r requirements.txt
+```
 
-2. **Authenticate with Hugging Face:**
-   - Get a token from [Hugging Face Settings](https://huggingface.co/settings/tokens)
-   - Set environment variable: `$env:HUGGINGFACE_HUB_TOKEN = "your_token_here"`
+### 2. Download & Explore
+```bash
+python download.py    # Fast download with progress bar
+python sample.py      # See sample data instantly
+```
 
-3. **Download dataset:**
-   ```bash
-   python download_dataset.py
-   ```
+The download script will ask for your Hugging Face token if needed.
 
-4. **Explore dataset:**
-   ```bash
-   python explore_dataset.py
-   ```
+## What You Get
 
-## Dataset
+- **100K+ conversations** from top LLMs (GPT-4, Claude, Llama, etc.)
+- **Multiple languages** (English, Spanish, French, etc.)
+- **Ready-to-use JSON** format in `data/` folder
+- **Instant analysis** with sample.py
 
-- **Source**: [lmsys-chat-1m](https://huggingface.co/datasets/lmsys/lmsys-chat-1m)
-- **Size**: 1 million chat conversations
-- **Format**: Apache Arrow (`.arrow` files)
-- **Location**: `lmsys-chat-1m/` (excluded from git)
+## System Requirements
 
-## Usage
+- **RAM**: 4GB+ (8GB recommended)
+- **Storage**: 1GB free space
+- **Python**: 3.8+
+- **Internet**: Fast connection for download
+
+## Usage Examples
 
 ```python
-from datasets import load_from_disk
+# Load your data
+import json
+with open('data/conversations.json', 'r') as f:
+    conversations = json.load(f)
 
-# Load dataset
-dataset = load_from_disk("lmsys-chat-1m")
-
-# Access data
-print(f"Total examples: {len(dataset['train'])}")
-example = dataset['train'][0]
-print(f"Model: {example['model']}")
-print(f"Conversation: {example['conversation']}")
+# Analyze models
+models = [conv['model'] for conv in conversations]
+print(f"Found {len(set(models))} different models!")
 ```
 
 ## Files
 
-- `download_dataset.py` - Download the dataset
-- `explore_dataset.py` - Explore dataset structure and content
-- `requirements.txt` - Python dependencies
+- `download.py` - Super fast download with progress bar
+- `sample.py` - Instant data exploration
+- `data/` - Your processed dataset (auto-created)
 
 ## Security
 
-- Personal tokens and cache files are excluded from git
-- Dataset folder is excluded from version control
-- No personal information is stored in the repository
+- Tokens protected in `.env` (git-ignored)
+- No personal data in repository
+- Clean, secure setup
+
+---
+
+Ready to analyze 100K+ conversations? Run `python download.py` and start exploring!

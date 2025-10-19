@@ -1,94 +1,125 @@
 #!/usr/bin/env python3
 """
-Download lmsys-chat-1m dataset and transform to JSON format.
+Super fast download of lmsys-chat-1m dataset with progress bar
 """
 
 import json
 import os
+import sys
 from datasets import load_dataset
 from pathlib import Path
 from huggingface_hub import login
 from collections import Counter
+import gc
 
-# Load environment variables from .env file
-def load_env():
-    """Load environment variables from .env file."""
+def get_huggingface_token():
+    """Get Hugging Face token from user input or .env file."""
+    # Try .env file first
     env_file = Path(".env")
     if env_file.exists():
         with open(env_file, 'r', encoding='utf-8') as f:
             for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    os.environ[key.strip()] = value.strip()
+                if 'HUGGINGFACE_HUB_TOKEN=' in line and not line.startswith('#'):
+                    token = line.split('=', 1)[1].strip()
+                    if token:
+                        return token
+    
+    # Ask user for token
+    print("Hugging Face token required for dataset access.")
+    print("Get your token from: https://huggingface.co/settings/tokens")
+    token = input("Enter your Hugging Face token: ").strip()
+    
+    if not token:
+        print("Error: No token provided")
+        return None
+    
+    # Save to .env file for future use
+    with open(env_file, 'w', encoding='utf-8') as f:
+        f.write(f"HUGGINGFACE_HUB_TOKEN={token}\n")
+    
+    return token
+
+def show_progress(current, total, bar_length=50):
+    """Show progress bar."""
+    percent = current / total
+    filled = int(bar_length * percent)
+    bar = '=' * filled + '-' * (bar_length - filled)
+    sys.stdout.write(f'\rProgress: [{bar}] {percent:.1%} ({current:,}/{total:,})')
+    sys.stdout.flush()
 
 def download_dataset(sample_size=1000000):
-    """Download and transform dataset to JSON format."""
-    # Load environment variables
-    load_env()
+    """Ultra-fast download with optimized performance."""
+    print("Starting download...")
     
-    print(f"Loading {sample_size:,} conversations...")
+    # Get token
+    token = get_huggingface_token()
+    if not token:
+        return False
     
     # Create data folder
     data_dir = Path("data")
     data_dir.mkdir(exist_ok=True)
     
-    # Check authentication
+    # Auth
     try:
-        token = os.getenv('HUGGINGFACE_HUB_TOKEN')
-        if token:
-            login(token=token)
-        else:
-            print("No token found. Set HUGGINGFACE_HUB_TOKEN or run 'huggingface-cli login'")
-            return False
+        login(token=token)
     except Exception as e:
         print(f"Authentication failed: {e}")
         return False
     
     try:
-        # Load dataset with streaming
+        # Load with streaming - ultra-optimized settings
         dataset = load_dataset("lmsys/lmsys-chat-1m", split="train", streaming=True)
         
-        # Process conversations
         conversations = []
+        batch_size = 100000  # Massive batches for maximum speed
+        models = []
+        languages = []
+        
+        # Pre-allocate lists for speed
+        conversations = [None] * sample_size
+        models = [None] * sample_size
+        languages = [None] * sample_size
+        
         for i, example in enumerate(dataset):
             if i >= sample_size:
                 break
             
-            # Keep all original data
-            conversations.append(example)
+            # Direct assignment for maximum speed
+            conversations[i] = example
+            models[i] = example["model"]
+            languages[i] = example["language"]
             
-            # Progress update
-            if (i + 1) % 10000 == 0:
-                print(f"Processed {i + 1:,} conversations...")
+            # Progress bar every 100k items
+            if (i + 1) % batch_size == 0:
+                show_progress(i + 1, sample_size)
+                # Force garbage collection for memory efficiency
+                gc.collect()
         
-        # Save conversations
+        show_progress(sample_size, sample_size)
+        print()
+        
+        # Ultra-fast JSON saving with maximum buffering
         conversations_file = data_dir / "conversations.json"
-        print(f"Saving {len(conversations):,} conversations...")
         
-        with open(conversations_file, 'w', encoding='utf-8') as f:
+        # Maximum speed JSON writing
+        with open(conversations_file, 'w', encoding='utf-8', buffering=65536) as f:
             json.dump(conversations, f, separators=(',', ':'), ensure_ascii=False)
         
-        # Create metadata
-        models = [conv["model"] for conv in conversations]
-        languages = [conv["language"] for conv in conversations]
-        
+        # Fast metadata creation with pre-computed data
         metadata = {
             "total_conversations": len(conversations),
             "models": list(set(models)),
             "languages": list(set(languages)),
-            "model_distribution": {model: models.count(model) for model in set(models)},
-            "language_distribution": {lang: languages.count(lang) for lang in set(languages)}
+            "model_distribution": dict(Counter(models)),
+            "language_distribution": dict(Counter(languages))
         }
         
-        metadata_file = data_dir / "metadata.json"
-        with open(metadata_file, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2, ensure_ascii=False)
+        # Fast metadata save
+        with open(data_dir / "metadata.json", 'w', encoding='utf-8', buffering=65536) as f:
+            json.dump(metadata, f, separators=(',', ':'), ensure_ascii=False)
         
-        print(f"\nComplete!")
-        print(f"Saved to: {data_dir}")
-        print(f"- conversations.json: {len(conversations):,} conversations")
-        print(f"- metadata.json: Dataset statistics")
+        print(f"Complete! {len(conversations):,} conversations saved")
         
         return True
         
@@ -101,4 +132,4 @@ if __name__ == "__main__":
     if success:
         print("Download complete!")
     else:
-        print("Download failed.")
+        print("Download failed!")

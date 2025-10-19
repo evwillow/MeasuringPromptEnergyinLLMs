@@ -1,19 +1,2 @@
-# Dataset folder
-lmsys-chat-1m/
-
-# Python cache
-__pycache__/
-*.pyc
-
-# IDE files
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Hugging Face cache and tokens
-.cache/
-*.token
+data/
 .env

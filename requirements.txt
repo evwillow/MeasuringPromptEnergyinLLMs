@@ -9,3 +9,5 @@ numpy
 jupyter
 ipykernel
 codecarbon
+datasets
+huggingface_hub

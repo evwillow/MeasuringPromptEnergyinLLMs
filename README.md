@@ -5,23 +5,26 @@ A comprehensive research toolkit for analyzing energy consumption patterns acros
 ## Overview
 
 This research project provides tools to:
-- Extract and clean conversation data from large datasets
+- Download and process large conversation datasets
+- Extract and clean prompts from conversations
 - Measure energy consumption of different LLM models
-- Analyze performance metrics and efficiency patterns
-- Generate comprehensive visualizations and insights
+- Perform feature engineering and exploratory analysis
+- Conduct statistical analysis and generate insights
 
 ## Project Structure
 
 ```
 MeasuringPromptEnergyinLLMs/
 ├── data/
-│   ├── conversations.jsonl    # Raw conversation data
-│   ├── prompts.jsonl          # Extracted and cleaned prompts
-│   └── energy.jsonl           # Energy consumption measurements
-├── clean.ipynb                # Data extraction and cleaning
-├── gather_energy_data.ipynb   # Energy measurement pipeline
-├── stats.ipynb                # Analysis and visualization
-├── download.py                # Data download utilities
+│   ├── conversations.jsonl    # Raw conversation data from LMSYS
+│   ├── prompts.jsonl         # Extracted and cleaned prompts
+│   └── energy.jsonl          # Energy consumption measurements
+├── 01_data_collection.ipynb      # Download LMSYS dataset
+├── 02_data_cleaning.ipynb        # Extract and clean prompts
+├── 03_energy_measurement.ipynb   # Measure energy consumption
+├── 04_feature_engineering.ipynb  # Feature engineering (placeholder)
+├── 05_exploratory_data_analysis.ipynb  # EDA (placeholder)
+├── 06_statistical_analysis.ipynb       # Statistical analysis (placeholder)
 └── requirements.txt           # Python dependencies
 ```
 
@@ -47,6 +50,7 @@ cp .env.example .env
 Create a `.env` file with your API credentials:
 
 ```env
+HUGGINGFACE_HUB_TOKEN=your_hf_token_here
 OPENAI_API_KEY=your_openai_key_here
 GROQ_API_KEY=your_groq_key_here
 MISTRAL_API_KEY=your_mistral_key_here
@@ -54,32 +58,59 @@ MISTRAL_API_KEY=your_mistral_key_here
 
 ### 3. Run the Pipeline
 
-**Step 1: Extract Prompts**
+**Step 1: Data Collection**
+```bash
+# Run the data collection notebook
+jupyter notebook 01_data_collection.ipynb
+# Execute all cells to download LMSYS dataset
+```
+
+**Step 2: Data Cleaning**
 ```bash
 # Run the data cleaning notebook
-jupyter notebook clean.ipynb
+jupyter notebook 02_data_cleaning.ipynb
 # Execute all cells to extract prompts from conversations
 ```
 
-**Step 2: Measure Energy**
+**Step 3: Energy Measurement**
 ```bash
 # Run the energy measurement notebook
-jupyter notebook gather_energy_data.ipynb
+jupyter notebook 03_energy_measurement.ipynb
 # Execute all cells to start energy measurements
 ```
 
-**Step 3: Analyze Results**
+**Step 4: Analysis (Coming Soon)**
 ```bash
-# Run the analysis notebook
-jupyter notebook stats.ipynb
-# Execute all cells to generate insights and visualizations
+# Run the analysis notebooks
+jupyter notebook 04_feature_engineering.ipynb
+jupyter notebook 05_exploratory_data_analysis.ipynb
+jupyter notebook 06_statistical_analysis.ipynb
 ```
 
 ## Detailed Usage
 
-### Data Extraction (`clean.ipynb`)
+### Data Collection (`01_data_collection.ipynb`)
 
-This notebook extracts user prompts from conversation data:
+This notebook downloads the LMSYS Chat 1M dataset:
+
+- **Source**: Hugging Face `lmsys/lmsys-chat-1m` dataset
+- **Output**: `data/conversations.jsonl` - Raw conversation data
+- **Features**:
+  - Streams data to avoid memory issues
+  - Progress tracking with visual indicators
+  - Configurable sample size and parameters
+
+**Key Configuration**:
+```python
+samples = 1_000_000
+output_path = Path("data/conversations.jsonl")
+split = "train"
+progress_every = 50_000
+```
+
+### Data Cleaning (`02_data_cleaning.ipynb`)
+
+This notebook extracts and cleans user prompts from conversation data:
 
 - **Input**: `data/conversations.jsonl` - Raw conversation data
 - **Output**: `data/prompts.jsonl` - Cleaned prompts with metadata
@@ -99,7 +130,7 @@ config = {
 }
 ```
 
-### Energy Measurement (`gather_energy_data.ipynb`)
+### Energy Measurement (`03_energy_measurement.ipynb`)
 
 This notebook measures energy consumption across different LLM models:
 
@@ -116,15 +147,11 @@ This notebook measures energy consumption across different LLM models:
 - Automatic error handling and retry logic
 - Batch result saving
 
-### Analysis and Visualization (`stats.ipynb`)
+### Analysis Notebooks (Coming Soon)
 
-This notebook provides comprehensive analysis of the collected data:
-
-- **Energy Consumption Analysis**: Model comparisons, efficiency metrics
-- **Performance Analysis**: Speed, latency, throughput comparisons
-- **Temporal Analysis**: Time-based patterns and trends
-- **Correlation Analysis**: Relationships between variables
-- **Statistical Insights**: Rankings, summaries, and key findings
+- **Feature Engineering** (`04_feature_engineering.ipynb`): Create derived features from raw data
+- **Exploratory Data Analysis** (`05_exploratory_data_analysis.ipynb`): Visualize patterns and relationships
+- **Statistical Analysis** (`06_statistical_analysis.ipynb`): Conduct hypothesis tests and statistical modeling
 
 ## Configuration Options
 
@@ -272,6 +299,13 @@ For questions, issues, or contributions:
 - Review the configuration options above
 
 ## Changelog
+
+### Version 2.0.0
+- **Restructured project** with numbered notebooks following data science workflow
+- **Added data collection** step for downloading LMSYS dataset
+- **Improved organization** with clear separation of concerns
+- **Enhanced documentation** with step-by-step instructions
+- **Added placeholder notebooks** for feature engineering, EDA, and statistical analysis
 
 ### Version 1.0.0
 - Initial release with core functionality

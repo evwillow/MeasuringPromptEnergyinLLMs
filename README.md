@@ -16,13 +16,13 @@ This research project provides tools to:
 ```
 MeasuringPromptEnergyinLLMs/
 ├── data/
-│   ├── conversations.jsonl    # Raw conversation data from LMSYS
-│   ├── prompts.jsonl         # Extracted and cleaned prompts
-│   └── energy.jsonl          # Energy consumption measurements
+│   ├── raw_conversations.jsonl    # Raw conversation data from LMSYS
+│   ├── clean_prompts.jsonl         # Extracted and cleaned prompts
+│   └── energy_measurements.jsonl          # Energy consumption measurements
 ├── 01_data_collection.ipynb      # Download LMSYS dataset
 ├── 02_data_cleaning.ipynb        # Extract and clean prompts
 ├── 03_energy_measurement.ipynb   # Measure energy consumption
-├── 04_feature_engineering.ipynb  # Feature engineering (placeholder)
+├── 04_feature_engineering.ipynb  # Comprehensive feature engineering
 ├── 05_exploratory_data_analysis.ipynb  # EDA (placeholder)
 ├── 06_statistical_analysis.ipynb       # Statistical analysis (placeholder)
 └── requirements.txt           # Python dependencies
@@ -94,7 +94,7 @@ jupyter notebook 06_statistical_analysis.ipynb
 This notebook downloads the LMSYS Chat 1M dataset:
 
 - **Source**: Hugging Face `lmsys/lmsys-chat-1m` dataset
-- **Output**: `data/conversations.jsonl` - Raw conversation data
+- **Output**: `data/raw_conversations.jsonl` - Raw conversation data
 - **Features**:
   - Streams data to avoid memory issues
   - Progress tracking with visual indicators
@@ -103,7 +103,7 @@ This notebook downloads the LMSYS Chat 1M dataset:
 **Key Configuration**:
 ```python
 samples = 1_000_000
-output_path = Path("data/conversations.jsonl")
+output_path = Path("data/raw_conversations.jsonl")
 split = "train"
 progress_every = 50_000
 ```
@@ -112,8 +112,8 @@ progress_every = 50_000
 
 This notebook extracts and cleans user prompts from conversation data:
 
-- **Input**: `data/conversations.jsonl` - Raw conversation data
-- **Output**: `data/prompts.jsonl` - Cleaned prompts with metadata
+- **Input**: `data/raw_conversations.jsonl` - Raw conversation data
+- **Output**: `data/clean_prompts.jsonl` - Cleaned prompts with metadata
 - **Features**:
   - Filters for English conversations only
   - Validates prompt quality (length, uniqueness, content)
@@ -147,9 +147,57 @@ This notebook measures energy consumption across different LLM models:
 - Automatic error handling and retry logic
 - Batch result saving
 
+### Feature Engineering (`04_feature_engineering.ipynb`)
+
+This notebook creates comprehensive linguistic and semantic features from prompt text:
+
+**Text Complexity Features:**
+- `syntactic_tree_depth` - Maximum depth of syntactic parse tree
+- `clause_count` - Number of clause markers and conjunctions
+- `flesch_kincaid_grade` - Readability grade level
+- `gunning_fog_index` - Text complexity index
+- `smog_index` - Simplified Measure of Gobbledygook
+
+**Lexical Features:**
+- `avg_word_frequency` - Average frequency of words in English
+- `lexical_diversity` - Diversity of vocabulary (sqrt normalization)
+- `type_token_ratio` - Ratio of unique words to total words
+- `vocabulary_richness` - Richness of vocabulary usage
+
+**Semantic Features:**
+- `named_entity_density` - Density of named entities (persons, places, organizations)
+- `semantic_category_diversity` - Diversity of part-of-speech categories
+
+**Sentiment Features:**
+- `sentiment_polarity` - Overall sentiment score (-1 to 1)
+- `sentiment_intensity` - Intensity of sentiment expression
+
+**Information Content:**
+- `information_density` - Ratio of content words to total words
+- `avg_sentence_length_prompt` - Average words per sentence
+
+**Topic Keyword Density (8 categories):**
+- `tech_ai_density` - Technology and AI-related keywords
+- `business_finance_density` - Business and finance keywords
+- `health_medical_density` - Health and medical keywords
+- `education_learning_density` - Education and learning keywords
+- `science_research_density` - Science and research keywords
+- `social_relationships_density` - Social and relationship keywords
+- `entertainment_culture_density` - Entertainment and culture keywords
+- `travel_lifestyle_density` - Travel and lifestyle keywords
+
+**Concept Density (6 categories):**
+- `abstract_thinking_density` - Abstract and philosophical concepts
+- `problem_solving_density` - Problem-solving and analytical concepts
+- `communication_density` - Communication and language concepts
+- `emotional_psychological_density` - Emotional and psychological concepts
+- `decision_making_density` - Decision-making and choice concepts
+- `time_change_density` - Time, change, and temporal concepts
+
+**Output**: `energy_features_dataset.jsonl` - Dataset with all engineered features
+
 ### Analysis Notebooks (Coming Soon)
 
-- **Feature Engineering** (`04_feature_engineering.ipynb`): Create derived features from raw data
 - **Exploratory Data Analysis** (`05_exploratory_data_analysis.ipynb`): Visualize patterns and relationships
 - **Statistical Analysis** (`06_statistical_analysis.ipynb`): Conduct hypothesis tests and statistical modeling
 
@@ -193,7 +241,7 @@ temperature = 0.3
 
 ## Output Data Format
 
-### Prompts Data (`prompts.jsonl`)
+### Prompts Data (`clean_prompts.jsonl`)
 ```json
 {
   "prompt_text": "How can I improve my productivity?",
@@ -201,7 +249,7 @@ temperature = 0.3
 }
 ```
 
-### Energy Data (`energy.jsonl`)
+### Energy Data (`energy_measurements.jsonl`)
 ```json
 {
   "prompt": "How can I improve my productivity?",
@@ -215,6 +263,46 @@ temperature = 0.3
   "tokens_per_second": 33.5,
   "energy_consumed_wh": 0.015,
   "response": "Here are several strategies to improve productivity..."
+}
+```
+
+### Feature Engineering Data (`energy_features_dataset.jsonl`)
+```json
+{
+  "prompt": "How can I improve my productivity?",
+  "model": "gpt-4o-mini-2024-07-18",
+  "timestamp": "2025-01-19 20:18:09",
+  "duration": 2.03,
+  "energy_consumed_wh": 0.015,
+  "syntactic_tree_depth": 3,
+  "clause_count": 2,
+  "flesch_kincaid_grade": 8.2,
+  "gunning_fog_index": 10.1,
+  "smog_index": 7.5,
+  "avg_word_frequency": 0.0003,
+  "lexical_diversity": 0.85,
+  "type_token_ratio": 0.78,
+  "vocabulary_richness": 0.82,
+  "named_entity_density": 0.05,
+  "semantic_category_diversity": 6,
+  "sentiment_polarity": 0.2,
+  "sentiment_intensity": 0.3,
+  "information_density": 0.75,
+  "avg_sentence_length_prompt": 12.5,
+  "tech_ai_density": 0.02,
+  "business_finance_density": 0.15,
+  "health_medical_density": 0.01,
+  "education_learning_density": 0.08,
+  "science_research_density": 0.03,
+  "social_relationships_density": 0.05,
+  "entertainment_culture_density": 0.01,
+  "travel_lifestyle_density": 0.02,
+  "abstract_thinking_density": 0.12,
+  "problem_solving_density": 0.18,
+  "communication_density": 0.25,
+  "emotional_psychological_density": 0.08,
+  "decision_making_density": 0.15,
+  "time_change_density": 0.10
 }
 ```
 
@@ -241,7 +329,7 @@ temperature = 0.3
 
 **Incomplete Processing**
 - The system tracks progress and can resume from interruptions
-- Check `processed` status in `prompts.jsonl` to see completion
+- Check `processed` status in `clean_prompts.jsonl` to see completion
 
 ### Performance Optimization
 
@@ -299,6 +387,13 @@ For questions, issues, or contributions:
 - Review the configuration options above
 
 ## Changelog
+
+### Version 2.1.0
+- **Comprehensive feature engineering** with 30+ linguistic and semantic features
+- **Topic keyword density** analysis across 8 major categories
+- **Concept density** analysis across 6 cognitive categories
+- **Advanced text analysis** including sentiment, readability, and complexity metrics
+- **Enhanced data processing** with spaCy, NLTK, and textstat libraries
 
 ### Version 2.0.0
 - **Restructured project** with numbered notebooks following data science workflow
